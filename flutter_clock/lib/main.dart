@@ -68,7 +68,6 @@ class _ClockAppState extends State<ClockApp> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
-    // En-boy oranına göre font ve container boyutlarını ayarlayın
     final double baseWidth = screenWidth * 0.25;
     final double baseHeight = screenHeight * 0.2;
     final double fontSize = screenHeight * 0.1;
