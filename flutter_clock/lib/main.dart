@@ -55,7 +55,7 @@ class _ClockAppState extends State<ClockApp> {
 
     final double baseWidth = screenWidth * 0.25;
     final double baseHeight = screenHeight * 0.2;
-    final double fontSize = screenHeight * 0.1;
+    final double fontSize = screenWidth * 0.1;
 
     return Scaffold(
       backgroundColor: HexColor("#FFB6C1"),
