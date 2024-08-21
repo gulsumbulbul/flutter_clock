@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'ClockModel.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,42 +27,25 @@ class ClockApp extends StatefulWidget {
 }
 
 class _ClockAppState extends State<ClockApp> {
-  String _hoursString = "";
-  String _minutesString = "";
-  String _secondString = "";
+  late ClockModel _clockModel;
+  late Timer _timer;
 
   @override
   void initState() {
     super.initState();
-    _hoursString = _hoursTime(DateTime.now());
-    _minutesString = _minutesTime(DateTime.now());
-    _secondString = _secondTime(DateTime.now());
-    Timer.periodic(Duration(seconds: 1), (Timer t) => _getTime());
+    _clockModel = ClockModel();
+    _updateTime();
+    _timer = Timer.periodic(Duration(seconds: 1), (Timer t) => _updateTime());
   }
 
-  void _getTime() {
-    final DateTime now = DateTime.now();
-    final String formattedHoursTime = _hoursTime(now);
-    final String formattedMinutesTime = _minutesTime(now);
-    final String formattedSecondsTime = _secondTime(now);
-
-    setState(() {
-      _hoursString = formattedHoursTime;
-      _minutesString = formattedMinutesTime;
-      _secondString = formattedSecondsTime;
-    });
+  void _updateTime() {
+    _clockModel.updateTime(DateTime.now());
   }
 
-  String _hoursTime(DateTime dateTime) {
-    return "${dateTime.hour.toString().padLeft(2, '0')}";
-  }
-
-  String _minutesTime(DateTime dateTime) {
-    return "${dateTime.minute.toString().padLeft(2, '0')}";
-  }
-
-  String _secondTime(DateTime dateTime) {
-    return "${dateTime.second.toString().padLeft(2, '0')}";
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 
   @override
@@ -78,12 +63,20 @@ class _ClockAppState extends State<ClockApp> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildFlipContainer(_hoursString, baseWidth, baseHeight, fontSize),
+            Observer(
+              builder: (_) => _buildFlipContainer(
+                  _clockModel.hoursString, baseWidth, baseHeight, fontSize),
+            ),
             SizedBox(width: 4),
-            _buildFlipContainer(
-                _minutesString, baseWidth, baseHeight, fontSize),
+            Observer(
+              builder: (_) => _buildFlipContainer(
+                  _clockModel.minutesString, baseWidth, baseHeight, fontSize),
+            ),
             SizedBox(width: 4),
-            _buildFlipContainer(_secondString, baseWidth, baseHeight, fontSize),
+            Observer(
+              builder: (_) => _buildFlipContainer(
+                  _clockModel.secondString, baseWidth, baseHeight, fontSize),
+            ),
           ],
         ),
       ),
