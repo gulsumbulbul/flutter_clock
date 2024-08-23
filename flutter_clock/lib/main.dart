@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_clock/ClockView.dart';
+import 'package:flutter_clock/ClockViewModel.dart';
 import 'dart:async';
-import 'package:hexcolor/hexcolor.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'ClockModel.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,8 +13,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: ClockApp(),
+    return MultiProvider(
+      providers: [
+        Provider<clockViewModel>(create: (_) => clockViewModel()),
+      ],
+      child: MaterialApp(
+        home: ClockApp(),
+      ),
     );
   }
 }
@@ -27,19 +32,19 @@ class ClockApp extends StatefulWidget {
 }
 
 class _ClockAppState extends State<ClockApp> {
-  late ClockModel _clockModel;
   late Timer _timer;
 
   @override
   void initState() {
     super.initState();
-    _clockModel = ClockModel();
-    _updateTime();
-    _timer = Timer.periodic(Duration(seconds: 1), (Timer t) => _updateTime());
+    final viewModel = Provider.of<clockViewModel>(context, listen: false);
+    _updateTime(viewModel);
+    _timer = Timer.periodic(
+        Duration(seconds: 1), (Timer t) => _updateTime(viewModel));
   }
 
-  void _updateTime() {
-    _clockModel.updateTime(DateTime.now());
+  void _updateTime(clockViewModel viewModel) {
+    viewModel.updateTime(DateTime.now());
   }
 
   @override
@@ -50,61 +55,6 @@ class _ClockAppState extends State<ClockApp> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double screenHeight = MediaQuery.of(context).size.height;
-
-    final double baseWidth = screenWidth * 0.25;
-    final double baseHeight = screenHeight * 0.2;
-    final double fontSize = screenHeight * 0.1;
-
-    return Scaffold(
-      backgroundColor: HexColor("#FFB6C1"),
-      body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Observer(
-              builder: (_) => _buildFlipContainer(
-                  _clockModel.hoursString, baseWidth, baseHeight, fontSize),
-            ),
-            SizedBox(width: 4),
-            Observer(
-              builder: (_) => _buildFlipContainer(
-                  _clockModel.minutesString, baseWidth, baseHeight, fontSize),
-            ),
-            SizedBox(width: 4),
-            Observer(
-              builder: (_) => _buildFlipContainer(
-                  _clockModel.secondString, baseWidth, baseHeight, fontSize),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFlipContainer(
-      String time, double width, double height, double fontSize) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: HexColor("FFB6C1"),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white, width: 2),
-      ),
-      child: Center(
-        child: Text(
-          time,
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            letterSpacing: 2.0,
-          ),
-        ),
-      ),
-    );
+    return ClockView();
   }
 }
